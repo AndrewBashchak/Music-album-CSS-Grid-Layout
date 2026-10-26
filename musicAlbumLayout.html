@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Game Melomaniac - Audio Album</title>
+  <style>
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(187, 134, 252, 0.7);
+      }
+      70% {
+        transform: scale(1.1);
+        box-shadow: 0 0 0 8px rgba(187, 134, 252, 0);
+      }
+      100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(187, 134, 252, 0);
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: linear-gradient(135deg, #0b0714 0%, #160b29 50%, #0d061a 100%);
+      background-attachment: fixed;
+      color: #e2d9f3;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .album-grid {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      grid-template-rows: auto 1fr auto;
+      grid-template-areas:
+        "header  header"
+        "sidebar content"
+        "player  player";
+      gap: 24px;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px 16px;
+      width: 100%;
+      flex: 1;
+      animation: fadeIn 0.8s ease-out forwards;
+    }
+
+    .album-header {
+      grid-area: header;
+      border-bottom: 1px solid #2e1a47;
+      padding-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .album-sidebar {
+      grid-area: sidebar;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .album-content {
+      grid-area: content;
+      overflow-x: auto;
+    }
+
+    .album-player {
+      grid-area: player;
+      position: sticky;
+      bottom: 12px;
+      background-color: #160e29;
+      padding: 16px;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
+      border: 1px solid #2e1a47;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .album-player:hover {
+      border-color: #bb86fc;
+      box-shadow: 0 8px 30px rgba(187, 134, 252, 0.25);
+    }
+
+    @media (max-width: 768px) {
+      .album-grid {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+          "header"
+          "sidebar"
+          "content"
+          "player";
+      }
+    }
+
+    .brand-logo {
+     width: 42px;
+      height: 42px;
+      border-radius: 8px;
+      object-fit: cover;
+      flex-shrink: 0;
+      border: 1px solid #2e1a47;
+      transition: transform 0.3s ease, border-color 0.3s ease;
+    }
+
+    .brand-logo:hover {
+      transform: rotate(8deg) scale(1.1);
+      border-color: #bb86fc;
+    }
+
+    .play-icon {
+      width: 16px;
+      height: 16px;
+      fill: #9a8bb0;
+      vertical-align: middle;
+      transition: fill 0.2s ease, transform 0.2s ease;
+    }
+
+    .album-title-group h1 {
+      font-size: 1.8rem;
+      color: #ffffff;
+      line-height: 1.2;
+    }
+
+    .album-title-group p {
+      color: #b3a5ca;
+      font-size: 0.95rem;
+    }
+
+    .cover-wrapper {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(15, 7, 30, 0.8);
+      background-color: #1f143a;
+      border: 1px solid #2e1a47;
+    }
+
+    .cover-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.4s ease;
+    }
+
+    .cover-wrapper:hover .cover-img {
+      transform: scale(1.06);
+    }
+
+    .album-meta p {
+      margin-bottom: 6px;
+      color: #b3a5ca;
+      font-size: 0.85rem;
+    }
+
+    .album-meta strong {
+      color: #ffffff;
+    }
+
+    .tracklist-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    .tracklist-table thead {
+      border-bottom: 2px solid #2e1a47;
+      color: #b3a5ca;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 1px;
+    }
+
+    .disc-header {
+      background-color: #1f1238;
+      color: #bb86fc;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      padding: 8px 14px;
+      text-align: center;
+      font-size: 0.8rem;
+    }
+
+    .tracklist-table th,
+    .tracklist-table td {
+      padding: 12px 14px;
+    }
+
+    .tracklist-table tbody tr {
+      transition: background-color 0.25s ease, transform 0.2s ease;
+      border-bottom: 1px solid #201338;
+    }
+
+    .tracklist-table tbody tr:hover {
+      background-color: #241442;
+      transform: translateX(4px);
+    }
+
+    .tracklist-table tbody tr:hover .track-title {
+      color: #bb86fc;
+    }
+
+    .tracklist-table tbody tr:hover .play-icon {
+      fill: #bb86fc;
+      transform: scale(1.2);
+    }
+
+    .col-num {
+      width: 40px;
+      text-align: center;
+      color: #9a8bb0;
+    }
+
+    .track-title {
+      font-weight: 500;
+      color: #fff;
+      transition: color 0.2s ease;
+    }
+
+    .col-duration {
+      text-align: right;
+      color: #b3a5ca;
+    }
+
+    .featured-artist {
+      vertical-align: middle;
+      background-color: rgba(187, 134, 252, 0.05);
+      color: #bb86fc;
+      font-weight: 500;
+      border-left: 2px solid #bb86fc;
+    }
+
+    .tracklist-table tfoot {
+      border-top: 2px solid #2e1a47;
+      font-size: 0.85rem;
+      color: #b3a5ca;
+      font-weight: 600;
+    }
+
+    .tracklist-table tfoot td {
+      padding: 14px;
+    }
+    
+    .player-header-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .pulse-dot {
+      width: 10px;
+      height: 10px;
+      background-color: #bb86fc;
+      border-radius: 50%;
+      display: inline-block;
+      animation: pulse 2s infinite ease-in-out;
+    }
+
+    .player-title {
+      font-size: 0.85rem;
+      color: #b3a5ca;
+    }
+
+    .album-player audio {
+      width: 100%;
+      outline: none;
+      height: 40px;
+    }
+  </style>
+</head>
+<body>
+  <div class="album-grid">
+   
+    <!-- Header -->
+    <header class="album-header">
+      <img src="game-melomaniac-logo.jpg" alt="Game Melomaniac Logo" class="brand-logo">
+      <div class="album-title-group">
+        <h1>Tower Defense Simulator - Solar Requiem</h1>
+        <p>Album by Phoqus</p>
+      </div>
+    </header>
+
+    <!-- Sidebar -->
+    <aside class="album-sidebar">
+      <div class="cover-wrapper">
+        <picture>
+          <source
+            srcset="solar-requiem-preview.jpg"
+            type="image/jpeg"
+            sizes="(max-width: 768px) 100vw, 280px"
+            >
+          <img
+            src="solar-requiem-preview.jpg"
+            srcset="solar-requiem-preview.jpg 600w"
+            sizes="(max-width: 768px) 100vw, 280px"
+            alt="Tower Defense Simulator - Solar Requiem"
+            class="cover-img"
+            loading="lazy"
+          >
+        </picture>
+      </div>
+
+      <div class="album-meta">
+        <p><strong>Genre:</strong> Chiptune, Electro, EDM</p>
+        <p><strong>Release Year:</strong> 2026</p>
+        <p><strong>Track Count:</strong> 5</p>
+      </div>
+    </aside>
+
+    <!-- Content Table -->
+    <main class="album-content">
+      <table class="tracklist-table">
+        <thead>
+          <tr>
+            <th colspan="5" class="disc-header">"Tower Defense Simulator - Solar Requiem" album</th>
+          </tr>
+          <tr>
+            <th class="col-num">#</th>
+            <th></th>
+            <th>Track Name</th>
+            <th>Artist</th>
+            <th class="col-duration">Duration</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="col-num">1</td>
+            <td>
+              <svg class="play-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            </td>
+            <td class="track-title">A Story To Tell...</td>
+            <td rowspan="5" class="featured-artist">Phoqus</td>
+            <td class="col-duration">8:04</td>
+          </tr>
+          <tr>
+            <td class="col-num">2</td>
+            <td>
+              <svg class="play-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            </td>
+            <td class="track-title">Moonveil</td>
+            <td class="col-duration">9:16</td>
+          </tr>
+          <tr>
+            <td class="col-num">3</td>
+            <td>
+              <svg class="play-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            </td>
+            <td class="track-title">Remnant (Penumbras Theme)</td>
+            <td class="col-duration">6:58</td>
+          </tr>
+          <tr>
+            <td class="col-num">4</td>
+            <td>
+              <svg class="play-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            </td>
+            <td class="track-title">Forsaken Kingdom</td>
+            <td class="col-duration">4:39</td>
+          </tr>
+          <tr>
+            <td class="col-num">5</td>
+            <td>
+              <svg class="play-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            </td>
+            <td class="track-title">Echo of Resentment Theme</td>
+            <td class="col-duration">6:10</td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="4">Total Duration:</td>
+            <td class="col-duration">34:27</td>
+          </tr>
+        </tfoot>
+      </table>
+    </main>
+
+    <!-- Player -->
+    <footer class="album-player">
+      <div class="player-header-info">
+        <span class="pulse-dot"></span>
+        <div class="player-title">Now playing: <strong>Tower Defense Simulator OST - A Story To Tell...</strong></div>
+      </div>
+      <audio controls>
+        <source src="tower-defense-simulator-ost_a-story-to-tell.mp3" type="audio/mpeg">
+      </audio>
+    </footer>
+  </div>
+</body>
+</html>
